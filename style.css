@@ -1,0 +1,32 @@
+/*
+ * part of the style based on http://js13kgames.com/entries/lost-in-cyberspace
+ */
+body {
+  margin: 0;
+  /*     background: black; */
+}
+#term {
+  height: 100vh;
+}
+:root {
+/*       --background: #031e11; */
+  --size: 1.12;
+
+  /*     Pallet 1 */
+  --background: #6a3e37;
+  --color: #29e7cd;
+  /*     Pallet 2 */
+  /*   --background: #01535 */
+}
+/* to see yourself like in a mirror */
+.self {
+  transform: scale(-1, 1);
+}
+
+
+
+/* glow */
+.terminal {
+/*   text-shadow: 0 0.2rem 1rem #E0ACD5; */
+}
+
