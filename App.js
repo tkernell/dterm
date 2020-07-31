@@ -1,5 +1,5 @@
 function teal(message) {
-  return "[[;#ED177A;]" + message + "]";
+  return "[[gb;#ED177A;]" + message + "]";
 }
 
 var App = {
@@ -10,11 +10,10 @@ var App = {
   space: undefined,
   thread: undefined,
   spaceName: "dterm-dev",
-  secretThread: "/orbitdb/zdpuAz9a9iUc3Y2PN98C1e2Tx5fFKk8S5gveu81aMGDEfWV5Q/3box.thread.dterm-dev.thread1",
   term: null,
   docs: {},
   echo: function(input) {
-    App.term.echo(teal(input));
+    App.term.echo(input);
   },
   dir: "/",
   tempstore: "b",
@@ -72,7 +71,10 @@ var App = {
         read: function() {
           this.echo(App.tempstore);
         },
-        
+        box: function() {
+          App.initBox();
+        },
+
         // 3BOX STORAGE FUNCTIONS
         ls: function() {
           App.space.private.all().then(function(files) {
@@ -89,7 +91,7 @@ var App = {
             App.echo(filename + " saved to private space");
           });
         },
-        
+
         // 3BOX THREADS
         createThread: function(name) {
           // App.space.thread.create
@@ -100,24 +102,28 @@ var App = {
           });
         },
         addThreadMember: function(id) {
-          App.echo("Adding member...")
+          App.echo("Adding member...");
           App.thread.addMember(id).then(function() {
             App.echo("Added " + id);
-          })
+          });
         },
         joinThread: function(threadAddress) {
           App.echo("Joining thread...");
           App.space.joinThreadByAddress(threadAddress).then(function(thread) {
             App.thread = thread;
             App.echo("Joined thread");
-          })
+          });
         },
         joinThread2: function() {
           App.echo("Joining thread...");
-          App.space.joinThreadByAddress("/orbitdb/zdpuAz9a9iUc3Y2PN98C1e2Tx5fFKk8S5gveu81aMGDEfWV5Q/3box.thread.dterm-dev.thread1").then(function(thread) {
-            App.thread = thread;
-            App.echo("Joined thread");
-          })
+          App.space
+            .joinThreadByAddress(
+              "/orbitdb/zdpuAz9a9iUc3Y2PN98C1e2Tx5fFKk8S5gveu81aMGDEfWV5Q/3box.thread.dterm-dev.thread1"
+            )
+            .then(function(thread) {
+              App.thread = thread;
+              App.echo("Joined thread");
+            });
         },
         getThreadAddress: function() {
           App.echo(App.thread.address);
@@ -125,35 +131,79 @@ var App = {
         threadPosts: function() {
           App.thread.getPosts().then(function(posts) {
             App.echo(posts);
-          })
+          });
         },
         post: function(message) {
           App.thread.post(message);
         },
         listen: function() {
           App.thread.onUpdate(function() {
-            App.thread.getPosts({ limit:1 }).then(function(post) {
+            App.thread.getPosts({ limit: 1 }).then(function(post) {
               console.log(post[0].message);
               App.echo(post[0].message);
-            })
-          })
+            });
+          });
         },
-        
+
         // Not for production
         createThread2: function(name) {
           App.space.joinThread(name).then(function(thread) {
             App.thread = thread;
-          })
+          });
         },
         joinMainThread: function() {
           App.echo("Joining main thread...");
-          App.space.joinThreadByAddress("/orbitdb/zdpuAtouX4XQHmh4G61mEBouwahK8LsLetLKcsP5FpejYtUcE/3box.thread.dterm-dev.monkey").then(function(thread) {
-            App.thread = thread;
-            
-          })
+          App.space
+            .joinThreadByAddress(
+              "/orbitdb/zdpuAtouX4XQHmh4G61mEBouwahK8LsLetLKcsP5FpejYtUcE/3box.thread.dterm-dev.monkey"
+            )
+            .then(function(thread) {
+              App.thread = thread;
+            });
         },
-        
-        
+
+        // **  WEB3  ** //
+        web3utils: function(option, value) {
+          this.echo(web3.utils[option](value));
+        },
+
+        bbx: function() {
+          this.echo("\n   ****    BBX Password Manager   ****    \n");
+          this.echo("Options:");
+          this.echo("  e  Encrypt File/Directory");
+          this.echo("  d  Decrypt File/Directory");
+          this.echo("  p  Generate New Password");
+          this.echo("  r  Retrieve Password");
+          this.echo("  a  Manage Accounts");
+        },
+
+        name: function(name) {
+          this.read("last name: ", last_name => {
+            this.echo("Your name is " + name + " " + last_name);
+          });
+        },
+
+        // ENS functions
+        ens: function() {},
+
+        // Experimental
+        html: function() {
+          const link = $('<a href="google.com">Google</a>');
+          App.echo(link);
+          // this.echo(link);
+        },
+        download: function(url) {
+          const link = $("<a href='" + url + "' download='file'>DOWNLOAD</a>");
+          this.echo(link);
+        },
+        getdoc: function(url) {
+          this.pause();
+          $.get(url, function(txt) {
+            App.echo(txt);
+            App.term.resume();
+          });
+        },
+
         image: function(width, height) {
           const img = $(
             '<img src="https://placekitten.com/' + width + "/" + height + '">'
@@ -161,10 +211,40 @@ var App = {
           img.on("load", this.resume);
           this.pause();
           this.echo(img);
+          const img2 = $(
+            "<img src='https://i0.wp.com/media.giphy.com/media/2si2ObWL19ZR9EFVX2/giphy.gif?w=708&ssl=1'>"
+          );
+          img2.on("load", this.resume);
+          this.pause();
+          this.echo(img2);
+        },
+
+        click_function3: function(func_name, description) {
+          // const func_call = "'[[" + func_name + "]]'";
+          const func_call = func_name;
+          var docline = $("<div class='menu_line'></div>");
+          var func_span = $("<span class='clickme'></span>").text(func_call);
+          func_span.click(function() {
+            App.term.echo(func_call);
+            App.term.exec(func_call);
+          });
+          var whitespace = ".".repeat(20 - func_name.length);
+          var whitespace_span = $("<span></span>").text(whitespace);
+          var descr_span = $("<span></span>").text(description);
+          docline.append(func_span, whitespace_span, descr_span);
+
+          this.echo(docline);
+        },
+        menu: function() {
+          // this.pause();
+          $.get("./menu.txt", function(doc) {
+            App.term.echo(doc);
+            // App.term.resume();
+          });
         }
       },
       {
-        greetings: teal("Welcome to the panda Portal! \n" + ""),
+        greetings: teal(welcomeMessage),
         completion: true
       }
     );
@@ -195,7 +275,7 @@ var App = {
       App.account = window.ethereum.selectedAddress;
       console.log("In initEth: " + App.account);
       App.echo("Detected account: " + App.account);
-      return App.initBox();
+      // return App.initBox();
     });
   },
 
@@ -234,4 +314,4 @@ $(function() {
   App.init();
 });
 
-const welcomeMessage = "" + "Welcome the the Minion Portal\n" + "";
+const welcomeMessage = "" + "Welcome to the Portal\n" + "";

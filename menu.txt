@@ -1,0 +1,7 @@
+[[echo '']]
+[[echo "Welcome to the Interactive Menu"]]
+[[echo '']]
+[[echo 'Here are some options:']]
+[[click_function3 menu 'See a menu of options']]
+[[click_function3 dns 'Manage your domains and browse the domain name system']]
+[[click_function3 orgtech 'Manage your organization and browse other existing orgs']]

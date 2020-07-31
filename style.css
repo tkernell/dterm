@@ -23,6 +23,17 @@ body {
   transform: scale(-1, 1);
 }
 
+.clickme:hover {
+  background-color: white;
+  color: black;
+  padding-left: 10px;
+  padding-right: 4px;
+}
+
+.clickme {
+  padding-left: 12px;
+}
+
 
 
 /* glow */
