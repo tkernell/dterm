@@ -9,7 +9,7 @@ body {
   height: 100vh;
 }
 :root {
-/*       --background: #031e11; */
+  /*       --background: #031e11; */
   --size: 1.12;
 
   /*     Pallet 1 */
@@ -19,25 +19,25 @@ body {
   /*   --background: #01535 */
 }
 /* to see yourself like in a mirror */
-.self {
+/* .self {
   transform: scale(-1, 1);
-}
+} */
 
 .clickme:hover {
-  background-color: white;
-  color: black;
+  font-weight: bold;
+  background-color: #29e7cd;
+  color: #6a3e37;
   padding-left: 10px;
   padding-right: 4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 .clickme {
   padding-left: 12px;
 }
 
-
-
 /* glow */
 .terminal {
-/*   text-shadow: 0 0.2rem 1rem #E0ACD5; */
+  /*   text-shadow: 0 0.2rem 1rem #E0ACD5; */
 }
-

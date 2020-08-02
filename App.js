@@ -228,7 +228,7 @@ var App = {
             App.term.echo(func_call);
             App.term.exec(func_call);
           });
-          var whitespace = ".".repeat(20 - func_name.length);
+          var whitespace = ".".repeat(15 - func_name.length);
           var whitespace_span = $("<span></span>").text(whitespace);
           var descr_span = $("<span></span>").text(description);
           docline.append(func_span, whitespace_span, descr_span);
@@ -275,6 +275,10 @@ var App = {
       App.account = window.ethereum.selectedAddress;
       console.log("In initEth: " + App.account);
       App.echo("Detected account: " + App.account);
+      
+      if (App.account !== "0x0") {
+        return App.initBox();
+      }
       // return App.initBox();
     });
   },
@@ -314,4 +318,6 @@ $(function() {
   App.init();
 });
 
-const welcomeMessage = "" + "Welcome to the Portal\n" + "";
+const welcomeMessage = "" + 
+      "this is dterm\n" + 
+      "your portal to the decentralized web";
