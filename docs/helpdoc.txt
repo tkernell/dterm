@@ -1,0 +1,16 @@
+
+WELCOME TO THE TERMINAL COMMAND HELP DOC. 
+COMMANDS: 
+    account             print your ethereum account 
+    echo {string}       echos string to terminal 
+    ls                  list your files 
+    touch {name text}   save new file on 3box 
+    cat {name}          print file contents 
+    help                get some info
+    
+3BOX COMMANDS: 
+    box                   start 3box if not started
+    createThread {name}   create private 3box thread
+    joinMainThread        join the main public thread
+    listen                listen to the thread you've joined
+    

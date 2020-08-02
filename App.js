@@ -1,7 +1,3 @@
-function teal(message) {
-  return "[[gb;#ED177A;]" + message + "]";
-}
-
 var App = {
   web3Provider: null,
   contracts: {},
@@ -12,6 +8,7 @@ var App = {
   spaceName: "dterm-dev",
   term: null,
   docs: {},
+  dictionary: [],
   echo: function(input) {
     App.term.echo(input);
   },
@@ -56,8 +53,12 @@ var App = {
             "3BOX COMMANDS: \n" +
             "\tcreateThread {name} \tcreate private 3box thread" +
             "";
+          
+          $.get('./docs/helpdoc.txt').then(function(helpdoc) {
+            App.echo(helpdoc);
+          })
 
-          App.echo(App.docs.helpdoc);
+          // App.echo(App.docs.helpdoc);
         },
         echo: function(input) {
           this.echo(teal(input));
@@ -65,10 +66,12 @@ var App = {
         account: function() {
           this.echo(App.account);
         },
-        save: function(input) {
+        // Save some text to a local variable
+        copytext: function(input) {
           App.tempstore = input;
         },
-        read: function() {
+        
+        pastetext: function() {
           this.echo(App.tempstore);
         },
         box: function() {
@@ -111,7 +114,8 @@ var App = {
           App.echo("Joining thread...");
           App.space.joinThreadByAddress(threadAddress).then(function(thread) {
             App.thread = thread;
-            App.echo("Joined thread");
+            App.term.exec('listen');
+            App.echo("Joined thread & listening");
           });
         },
         joinThread2: function() {
@@ -137,10 +141,14 @@ var App = {
           App.thread.post(message);
         },
         listen: function() {
+          // Make sure username dictionary is loaded
+          App.loadDictionary();
+      
           App.thread.onUpdate(function() {
             App.thread.getPosts({ limit: 1 }).then(function(post) {
-              console.log(post[0].message);
-              App.echo(post[0].message);
+              const post0 = post[0];
+              console.log(post0.message);
+              App.echo(teal(getUsername(post0.author, App.dictionary) + ':: ') + post0.message);
             });
           });
         },
@@ -159,6 +167,8 @@ var App = {
             )
             .then(function(thread) {
               App.thread = thread;
+              App.term.exec('listen');
+              App.echo("Joined thread and listening");
             });
         },
 
@@ -182,9 +192,7 @@ var App = {
             this.echo("Your name is " + name + " " + last_name);
           });
         },
-
-        // ENS functions
-        ens: function() {},
+        
 
         // Experimental
         html: function() {
@@ -308,10 +316,20 @@ var App = {
         // App.echo(space);
         App.echo("Space synced!");
         App.space = space;
-        // return App.runOnce();
+        return App.initAdditional();
       });
     });
+  },
+  initAdditional: function() {
+    App.term.exec('joinMainThread');
+  },
+  
+  loadDictionary: function() {
+    $.get('./docs/words.txt').then(function(dictionary) {
+      App.dictionary = dictionary.split('\n');
+    })
   }
+  
 };
 
 $(function() {
@@ -321,3 +339,17 @@ $(function() {
 const welcomeMessage = "" + 
       "this is dterm\n" + 
       "your portal to the decentralized web";
+
+
+function getUsername(id, words) {
+  const substrLength = 6;
+  const n1 = web3.utils.hexToNumber((web3.utils.sha3(id).substr(0, substrLength))) % words.length;
+  const n2 = web3.utils.hexToNumber('0x' + (web3.utils.sha3(id).substr((substrLength+1), (substrLength + substrLength - 2)))) % words.length;
+  
+  console.log(words[n1] + '-' + words[n2])  
+  return(words[n1] + "-" + words[n2]);
+};
+
+function teal(message) {
+  return "[[g;#ED177A;]" + message + "]";
+}
