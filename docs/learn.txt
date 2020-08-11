@@ -1,0 +1,29 @@
+
+[[;#74574a;]______________________________________________________________________]
+
+[[b;#45b6fe;]Learn About the Decentralized Web]
+
+[[bg;;]Decentralized Storage]
+  This portal is hosted on IPFS, a different way to store data.
+  Anyone can help host this site by pinning its root content ID.
+  
+[[b;;]Decentralized Domain Name]
+  You find this portal by navigating to an address registered with 
+  ENS, a decentralized naming service on the Ethereum blockchain.
+  
+[[b;;]Metamask]
+  A browser extension that allows you to interact with [[g;;]Ethereum]
+  dapps and manage cryptocurrencies from regular Web 2.0 browsers 
+  like Chrome
+  
+[[b;;]3Box]
+  Provides scaffolding for personal data storage and messaging using 
+  IPFS and OrbitDB
+  
+[[b;;]Smart Contracts]
+  Computer programs that run on a blockchain (like Ethereum) that run 
+  exactly as written. 
+  
+[[bg;;]dterm]
+  Combine these pieces together (among others) and you have a free and 
+  open interface to the decentralized web. 

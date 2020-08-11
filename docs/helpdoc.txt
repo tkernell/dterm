@@ -1,5 +1,9 @@
 
+[[;#74574a;]______________________________________________________________________]
+
 WELCOME TO THE TERMINAL COMMAND HELP DOC. 
+
+
 COMMANDS: 
     account             print your ethereum account 
     echo {string}       echos string to terminal 
@@ -7,10 +11,31 @@ COMMANDS:
     touch {name text}   save new file on 3box 
     cat {name}          print file contents 
     help                get some info
+    learn               learn a thing or two
+    
     
 3BOX COMMANDS: 
     box                   start 3box if not started
-    createThread {name}   create private 3box thread
-    joinMainThread        join the main public thread
+    post {string}         post a message to the thread
     listen                listen to the thread you've joined
+                            - (prints posts so you can see them)
+
+    createThread {name}   create private 3box thread
+    addThreadMember {id}  add member to private thread
+    getThreadAddress      see the addr of your current thread
+    joinThread {addr}     join existing thread by thread addr
+    joinMainThread        join the main public thread
+    
+
+CONTRACT INTERACTIONS:
+    web3utils {option value}  
+    addContract {name addr abiName}
+    myContracts
+    contractMethods {name}
+    myAbis
+    addAbi {name abi}
+    
+    
+    
+There are plenty more features. Look around and see what you find ;)
     

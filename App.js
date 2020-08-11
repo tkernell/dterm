@@ -1,19 +1,25 @@
+// !! This project is under development
+var count = 0;
+
 var App = {
   web3Provider: null,
   contracts: {},
   account: "0x0",
   box: undefined,
   space: undefined,
-  thread: undefined,
+  thread: undefined,       // 
+  settingsThread: undefined,
+  settings: {},
   spaceName: "dterm-dev",
   term: null,
   docs: {},
-  dictionary: [],
+  dictionary: [],  // 
   echo: function(input) {
     App.term.echo(input);
   },
   dir: "/",
   tempstore: "b",
+  // Not in use
   tempStore: {
     name: "john",
     uncle: "bill",
@@ -37,45 +43,47 @@ var App = {
     $("body").terminal(
       {
         help: function() {
-          App.docs.helpdoc =
-            "" +
-            "\n" +
-            "WELCOME TO THE TERMINAL COMMAND HELP DOC. \n" +
-            "" +
-            "\nCOMMANDS: \n" +
-            "\taccount \t\t\tprint your ethereum account \n" +
-            "\techo {string} \t\techos string to terminal \n" +
-            "\tls \t\t\t\t\tlist your files \n" +
-            "\ttouch {name text} \tsave new file on 3box \n" +
-            "\tcat {name} \t\t\tprint file contents \n" +
-            "\thelp \t\t\t\tget some info\n" +
-            "\n" +
-            "3BOX COMMANDS: \n" +
-            "\tcreateThread {name} \tcreate private 3box thread" +
-            "";
-          
-          $.get('./docs/helpdoc.txt').then(function(helpdoc) {
+          $.get("./docs/helpdoc.txt").then(function(helpdoc) {
             App.echo(helpdoc);
-          })
-
-          // App.echo(App.docs.helpdoc);
+          });
         },
         echo: function(input) {
-          this.echo(teal(input));
+          this.echo(color(input));
         },
+        // echo: function(string) {
+        //   return new Promise(function(resolve) {
+        //     App.term.echo(string);
+        //     setTimeout(resolve, 1000);
+        //   });
+        // },
+        // read: function() {
+        //   return App.term.read('').then(function(string) {
+        //     App.term.echo('read[' +(++count)+']: ' + string);
+        //   });
+        // },
         account: function() {
           this.echo(App.account);
         },
-        // Save some text to a local variable
+        // Save some text to a local variable tempstore
         copytext: function(input) {
           App.tempstore = input;
         },
-        
+        learn: function() {
+          $.get("./docs/learn.txt").then(function(learndoc) {
+            App.echo(learndoc);
+          });
+        },
+        // Echo tempstore text
         pastetext: function() {
           this.echo(App.tempstore);
         },
         box: function() {
           App.initBox();
+        },
+        less: function(url) {
+          $.get(url).then(text => {
+            this.less(text);
+          });
         },
 
         // 3BOX STORAGE FUNCTIONS
@@ -97,7 +105,6 @@ var App = {
 
         // 3BOX THREADS
         createThread: function(name) {
-          // App.space.thread.create
           App.echo("Creating thread...");
           App.space.createConfidentialThread(name).then(function(thread) {
             App.echo("Thread created.");
@@ -114,7 +121,7 @@ var App = {
           App.echo("Joining thread...");
           App.space.joinThreadByAddress(threadAddress).then(function(thread) {
             App.thread = thread;
-            App.term.exec('listen');
+            App.term.exec("listen");
             App.echo("Joined thread & listening");
           });
         },
@@ -143,17 +150,28 @@ var App = {
         listen: function() {
           // Make sure username dictionary is loaded
           App.loadDictionary();
-      
+
           App.thread.onUpdate(function() {
             App.thread.getPosts({ limit: 1 }).then(function(post) {
               const post0 = post[0];
               console.log(post0.message);
-              App.echo(teal(getUsername(post0.author, App.dictionary) + ':: ') + post0.message);
+              App.echo(
+                color(getUsername(post0.author, App.dictionary) + ":: ") +
+                  post0.message
+              );
             });
           });
+        },   
+        mute: function() {    // mute doesn't work
+          App.thread.onUpdate(function() {    
+          })
         },
-
-        // Not for production
+        makeDefaultThread: function() {
+          App.settings.defaultThread = App.thread.address;
+          App.settingsThread.post(App.settings).then(function() {
+            App.term.echo('Settings saved!');
+          })
+        },
         createThread2: function(name) {
           App.space.joinThread(name).then(function(thread) {
             App.thread = thread;
@@ -167,7 +185,7 @@ var App = {
             )
             .then(function(thread) {
               App.thread = thread;
-              App.term.exec('listen');
+              App.term.exec("listen");
               App.echo("Joined thread and listening");
             });
         },
@@ -176,24 +194,44 @@ var App = {
         web3utils: function(option, value) {
           this.echo(web3.utils[option](value));
         },
-
-        bbx: function() {
-          this.echo("\n   ****    BBX Password Manager   ****    \n");
-          this.echo("Options:");
-          this.echo("  e  Encrypt File/Directory");
-          this.echo("  d  Decrypt File/Directory");
-          this.echo("  p  Generate New Password");
-          this.echo("  r  Retrieve Password");
-          this.echo("  a  Manage Accounts");
+        addContract: function(_name, _address, _abiName) {
+          if (Object.keys(App.settings.contracts).includes(_name)) {
+            App.term.echo("Contract with this name already exists. Try another name.");
+          } else if (App.settings.abis[_abiName] == undefined) {
+            App.term.echo("No abi with this name exists. \nPlease either add abi with 'addAbi {name abi}' or choose a different name.");
+          } else {
+            App.settings.contracts[_name] = {
+              address: _address,
+              category: _abiName,
+              contract: new web3.eth.Contract(JSON.parse(App.settings.abis[_abiName]))
+            }
+            App.settings.contracts[_name].contract.options.address = _address;
+            App.settingsThread.post(App.settings).then(function() {
+              App.echo("Contract added");
+            });
+          }
         },
-
-        name: function(name) {
-          this.read("last name: ", last_name => {
-            this.echo("Your name is " + name + " " + last_name);
-          });
+        myContracts: function() {
+          App.term.echo(Object.keys(App.settings.contracts));
+        },
+        myAbis: function() {
+          App.term.echo(Object.keys(App.settings.abis).join('\n'));
+        },
+        contractMethods: function(name) {
+          this.echo(Object.keys(App.settings.contracts[name].contract.methods).join('\n'))
+        },
+        addAbi: function(_name, _abi) {
+          if (App.settings.abis[_name] !== undefined) {
+            this.echo("abi with name " + _name + " already exists. Please choose different name.");
+          } else {
+            App.settings.abis[_name] = _abi;
+            App.settingsThread.post(App.settings).then(function() {
+              App.echo("abi added");
+            })
+          }
         },
         
-
+      
         // Experimental
         html: function() {
           const link = $('<a href="google.com">Google</a>');
@@ -211,7 +249,11 @@ var App = {
             App.term.resume();
           });
         },
-
+        name: function(name) {
+          this.read("last name: ", last_name => {
+            this.echo("Your name is " + name + " " + last_name);
+          });
+        },
         image: function(width, height) {
           const img = $(
             '<img src="https://placekitten.com/' + width + "/" + height + '">'
@@ -226,9 +268,15 @@ var App = {
           this.pause();
           this.echo(img2);
         },
+        objectkeys: function(object) {  // View App.object names
+          
+          this.echo(Object.keys(App[object]).join("  "));
+        },
 
-        click_function3: function(func_name, description) {
-          // const func_call = "'[[" + func_name + "]]'";
+        // Used for creating interactive menus from text files
+        // in the form of 'clickableText..........Description'
+        // The clickableText MUST be an internal terminal function
+        click_function: function(func_name, description) {
           const func_call = func_name;
           var docline = $("<div class='menu_line'></div>");
           var func_span = $("<span class='clickme'></span>").text(func_call);
@@ -245,15 +293,16 @@ var App = {
         },
         menu: function() {
           // this.pause();
-          $.get("./menu.txt", function(doc) {
+          $.get("./docs/menu.txt", function(doc) {
             App.term.echo(doc);
             // App.term.resume();
           });
         }
       },
       {
-        greetings: teal(welcomeMessage),
-        completion: true
+        greetings: color(welcomeMessage),
+        completion: true,
+        // pipe: true
       }
     );
     App.term = $("body").terminal();
@@ -278,12 +327,13 @@ var App = {
 
   initEth: function() {
     App.echo("Initializing ethereum account...");
-    ethereum.enable().then(function() {
+    ethereum.request({ method: 'eth_requestAccounts' }).then(function() {
+    // ethereum.enable().then(function() {
       console.log("Ethereum enabled");
       App.account = window.ethereum.selectedAddress;
       console.log("In initEth: " + App.account);
       App.echo("Detected account: " + App.account);
-      
+
       if (App.account !== "0x0") {
         return App.initBox();
       }
@@ -316,40 +366,147 @@ var App = {
         // App.echo(space);
         App.echo("Space synced!");
         App.space = space;
-        return App.initAdditional();
+        return App.initSettings();
       });
     });
   },
-  initAdditional: function() {
-    App.term.exec('joinMainThread');
+  
+  // Initialize user settings. These are stored in a personal
+  // confidential thread
+  initSettings: function() {
+    App.term.echo("Initializing user settings...");
+    // Check whether dterm settings thread address exists,
+    // This isn't storage isn't needed. Just check space.subscribedThreads()
+    // SUBSCRIBEDTHREADS MAKES SOME THINGS MUCH SIMPLER FOR SOME USER DATA!!
+    App.space.private.get('_dtermsettingsthread').then(function(addr) {
+      if (addr == null) {
+        App.term.echo("No settings yet. Generating settings data...");
+        // If settings thread does not exist, create it
+        App.space.createConfidentialThread('_dtermsettings').then(function(settingsThread) {
+          // Save the thread address to storage for future retrieval
+          App.space.private.set('_dtermsettingsthread', settingsThread.address).then(function() {
+            App.settingsThread = settingsThread;
+            App.settings = {
+              defaultThread: '/orbitdb/zdpuAtouX4XQHmh4G61mEBouwahK8LsLetLKcsP5FpejYtUcE/3box.thread.dterm-dev.monkey',
+              contactList: undefined,
+              listen: true,
+              inbox: undefined,
+              contracts: {},
+              abis: {}
+            };
+            App.settingsThread.post(App.settings).then(function() {
+              return App._initSettings();
+            })
+          })
+        })
+      } else {
+        console.log("Joining settings thread...");
+        App.space.joinThreadByAddress(addr).then(function(settingsThread) {
+          console.log("Joined settings thread");
+          App.settingsThread = settingsThread;
+          App.settingsThread.getPosts().then(function(posts) {
+            console.log("Got settings thread posts");
+            App.settings = posts[posts.length - 1].message;
+            return App._initSettings();
+          })
+          
+        })
+        
+      } 
+    })
   },
   
-  loadDictionary: function() {
-    $.get('./docs/words.txt').then(function(dictionary) {
-      App.dictionary = dictionary.split('\n');
+  _initSettings: function() {
+    console.log("In _initSettings");
+    App.space.joinThreadByAddress(App.settings.defaultThread).then(function(thread) {
+      App.thread = thread;
+      if (App.settings.listen) {
+        App.term.exec('listen');
+      }
     })
-  }
+    return App.initExperiment();
+  },
   
+  // Initializing contracts explicitly
+  initExperiment: function() {
+    App.settings.contracts = {
+      'minionAvalanche': {
+        address: '0x7A98a55A1300B52c126B0e011C780197bb468033',  // KOVAN
+        category: 'minion',
+        contract: {}
+      },
+      'avalanche': {
+        address: '0x0190b395672ece097def4c64691099d810d84ea8',  // KOVAN
+        category: 'moloch_v2',
+        contract: {}
+      },
+      'simpleStorage': {
+        address: '0xc9CdB7d8196fB9994c83b7740D7297462942993f',  // KOVAN
+        category: {},
+        contract: {}
+      },
+      'minionPublicResolver': {
+        address: '0x13f01E79a6B96bbbFeDf50aaffb0EFC5B2D3C0bE', // ROPSTEN
+        category: 'minionPublicResolver',
+        contract: {}
+      }
+    }
+    $.get("./docs/abi/minion.json").then(function(minion_abi) {
+      $.get("./docs/abi/moloch_v2.txt").then(function(moloch_abi_string) {
+        const moloch_abi = JSON.parse(moloch_abi_string);
+        App.settings.contracts.minionAvalanche.contract = new web3.eth.Contract(minion_abi);
+        App.settings.contracts.minionAvalanche.contract.options.address = App.settings.contracts.minionAvalanche.address;
+    
+        App.settings.contracts.avalanche.contract = new web3.eth.Contract(moloch_abi);
+        App.settings.contracts.avalanche.contract.options.address = App.settings.contracts.avalanche.address;
+        
+      })
+    })
+    $.get("./docs/abi/simpleStorage.json").then(function(abi) {
+      App.settings.contracts.simpleStorage.contract = new web3.eth.Contract(abi);
+      App.settings.contracts.simpleStorage.contract.options.address = App.settings.contracts.simpleStorage.address;
+    })
+  },
+  
+  initAdditional: function() {
+    App.term.exec("joinMainThread");
+  },
+
+  loadDictionary: function() {
+    $.get("./docs/words.txt").then(function(dictionary) {
+      App.dictionary = dictionary.split("\n");
+    });
+  }
 };
 
 $(function() {
   App.init();
 });
 
-const welcomeMessage = "" + 
-      "this is dterm\n" + 
-      "your portal to the decentralized web";
-
+const welcomeMessage =
+  "" + "this is dterm\n" + "your portal to the decentralized web" + "\n\ntype 'help' for some options";
 
 function getUsername(id, words) {
   const substrLength = 6;
-  const n1 = web3.utils.hexToNumber((web3.utils.sha3(id).substr(0, substrLength))) % words.length;
-  const n2 = web3.utils.hexToNumber('0x' + (web3.utils.sha3(id).substr((substrLength+1), (substrLength + substrLength - 2)))) % words.length;
-  
-  console.log(words[n1] + '-' + words[n2])  
-  return(words[n1] + "-" + words[n2]);
+  const n1 =
+    web3.utils.hexToNumber(web3.utils.sha3(id).substr(0, substrLength)) %
+    words.length;
+  const n2 =
+    web3.utils.hexToNumber(
+      "0x" +
+        web3.utils
+          .sha3(id)
+          .substr(substrLength + 1, substrLength + substrLength - 2)
+    ) % words.length;
+
+  console.log(words[n1] + "-" + words[n2]);
+  return words[n1] + "-" + words[n2];
+}
+
+function color(message) {
+  return "[[g;#ED177A;]" + message + "]";
+};
+function colorUserMessage(message) {
+  return "[[;;]" + message + "]";
 };
 
-function teal(message) {
-  return "[[g;#ED177A;]" + message + "]";
-}
