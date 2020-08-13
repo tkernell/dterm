@@ -50,17 +50,6 @@ var App = {
         echo: function(input) {
           this.echo(color(input));
         },
-        // echo: function(string) {
-        //   return new Promise(function(resolve) {
-        //     App.term.echo(string);
-        //     setTimeout(resolve, 1000);
-        //   });
-        // },
-        // read: function() {
-        //   return App.term.read('').then(function(string) {
-        //     App.term.echo('read[' +(++count)+']: ' + string);
-        //   });
-        // },
         account: function() {
           this.echo(App.account);
         },
@@ -231,7 +220,51 @@ var App = {
           }
         },
         
-      
+        // ******** Minion Public Resolver Demo ***********
+        // **
+        miniondemo: function() {
+          $.get('./docs/minion/header.txt', function(doc) {
+            App.term.echo(doc);
+          })
+          web3.eth.ens.getContenthash('superdao.eth').then(function(superdao_CID) {
+            web3.eth.ens.getContenthash('gov.superdao.eth').then(function(govsuperdao_CID) {
+              web3.eth.ens.getContenthash('bbxsys.eth').then(function(bbxsys_CID) {
+                App.term.echo('  superdao.eth' + '            ' + superdao_CID.decoded);
+                App.term.echo('  gov.superdao.eth' + '        ' + govsuperdao_CID.decoded);
+                App.term.echo('  bbxsys.eth' + '              ' + bbxsys_CID.decoded);
+                
+                $.get('./docs/minion/footer.txt', function(footer) {
+                  App.term.echo(footer);
+                })
+              })
+            })
+          })
+
+        },
+        
+        minion: function(option) {
+          if (option == 'resolver') {
+            var node, hash, description;
+            App.term.read("Finally, give a description of your change (use quotation marks): ", _description => {
+              description = _description;
+              const resolver = App.settings.contracts.minionPublicResolver.contract;
+              resolver.methods.proposeSetContenthash(
+                node,
+                hash,
+                description).send({
+                  from: App.account
+              })
+            })
+            App.term.read("What is the new IPFS content ID?: ", newCid => {
+              hash = '0x' + contentHash.fromIpfs(newCid);
+            })
+            App.term.read("Which domain name would you like to change?: ", domain => {
+              node = getENSNode(domain);
+            })
+          }
+        },
+        
+        
         // Experimental
         html: function() {
           const link = $('<a href="google.com">Google</a>');
@@ -250,9 +283,37 @@ var App = {
           });
         },
         name: function(name) {
-          this.read("last name: ", last_name => {
-            this.echo("Your name is " + name + " " + last_name);
-          });
+          var firstthing;
+          var secondthing;
+          var thirdthing;
+          
+          if (name == 'Bob') {
+            this.read("first thing: ", thing1 => {
+              firstthing = thing1;
+              App.term.echo("Thing1: " + thing1);
+            
+              App.term.echo(firstthing + secondthing + thirdthing);
+            });
+            this.read("thingyB: ", thingyB => {
+              App.term.echo("thingyB: " + thingyB);
+            })
+          }
+        
+          this.read("Second thing: ", thing2 => {
+            secondthing = thing2;
+            App.term.echo("Thing2: " + thing2);
+            
+          })
+          this.read("Third thing: ", thing3 => {
+            thirdthing = thing3;
+            App.term.echo("Thing3: " + thing3);
+          })
+          // this.read("last name: ", last_name => {
+          //   this.echo("Your name is " + name + " " + last_name);
+          //   App.term.read("another thing: ", thing2 => {
+          //     this.echo("thing2: " + thing2);
+          //   })
+          // });
         },
         image: function(width, height) {
           const img = $(
@@ -423,6 +484,11 @@ var App = {
       if (App.settings.listen) {
         App.term.exec('listen');
       }
+      
+      const queryString = window.location.search;
+      if (queryString !== '') {
+        App.term.exec(queryString.substr(1, queryString.length));
+      }
     })
     return App.initExperiment();
   },
@@ -465,6 +531,10 @@ var App = {
     $.get("./docs/abi/simpleStorage.json").then(function(abi) {
       App.settings.contracts.simpleStorage.contract = new web3.eth.Contract(abi);
       App.settings.contracts.simpleStorage.contract.options.address = App.settings.contracts.simpleStorage.address;
+    })
+    $.get("./docs/abi/minionPublicResolver.json").then(function(abi) {
+      App.settings.contracts.minionPublicResolver.contract = new web3.eth.Contract(abi);
+      App.settings.contracts.minionPublicResolver.contract.options.address = App.settings.contracts.minionPublicResolver.address;
     })
   },
   
@@ -510,3 +580,18 @@ function colorUserMessage(message) {
   return "[[;;]" + message + "]";
 };
 
+function getENSNode(name) {
+  const TLD_NODE = '0x93cdeb708b7545dc668eb9280176169d1c33cfd8ed6f04690a0bcc88a93fc4ae';
+  const keccak256 = web3.utils.keccak256;
+  var domainSplit = name.split('.');
+  var label = keccak256(domainSplit[0]);
+  if (domainSplit.length == 2) {
+    return keccak256(TLD_NODE + label.split('x')[1]);
+  } else {
+    var remainder = domainSplit.splice(1, (domainSplit.length-1)).join('.');
+    // mydomainSplit.splice(1,mydomainSplit.length-1).join('.')
+    return keccak256(getENSNode(remainder) + label.split('x')[1]);
+  }
+  
+  
+}

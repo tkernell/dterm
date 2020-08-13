@@ -1,0 +1,13 @@
+
+
+
+
+
+Would you like to propose a change? Type:
+
+    minion resolver superdao.eth ipfs://Qm...
+  
+    Then hit <enter>
+  
+This will initiate a transaction that submits the change to the DAO. 
+Note: A DAO member must sponsor your proposal before members vote on it.

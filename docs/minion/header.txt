@@ -1,0 +1,11 @@
+[[;#74574a;]______________________________________________________________________]
+
+[[b;#45b6fe;]Welcome to the Minion Public Resolver]
+[[b;#45b6fe;]Ropsten Network Demo]
+
+[[;#ED177A;]Minion: 0x13f01E79a6B96bbbFeDf50aaffb0EFC5B2D3C0bE]
+[[;#ED177A;]DAO:    0x7C61061f89d7Fe626c5f054b3A08c4a8ccC9E1Db]
+
+
+
+Domains:
