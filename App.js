@@ -59,11 +59,10 @@ var App = {
         box: function() {
           App.initBox();
         },
-        less: function(url) {
-          $.get(url).then(text => {
-            this.less(text);
-          });
+        contact: function() {
+          this.echo(colorFriendUsername("contact me:    ultreia0@protonmail.com"));
         },
+
 
         // 3BOX STORAGE FUNCTIONS
         ls: function() {
@@ -103,17 +102,6 @@ var App = {
             App.term.exec("listen");
             App.echo("Joined thread & listening");
           });
-        },
-        joinThread2: function() {
-          App.echo("Joining thread...");
-          App.space
-            .joinThreadByAddress(
-              "/orbitdb/zdpuAz9a9iUc3Y2PN98C1e2Tx5fFKk8S5gveu81aMGDEfWV5Q/3box.thread.dterm-dev.thread1"
-            )
-            .then(function(thread) {
-              App.thread = thread;
-              App.echo("Joined thread");
-            });
         },
         getThreadAddress: function() {
           App.echo(App.thread.address);
