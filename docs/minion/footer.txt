@@ -5,9 +5,13 @@
 
 Would you like to propose a change? Type:
 
-    minion resolver superdao.eth ipfs://Qm...
+    minion resolver
   
     Then hit <enter>
-  
-This will initiate a transaction that submits the change to the DAO. 
+
+You will be asked a series of questions about your desired change.
+This will initiate a transaction that submits the change to the DAO.
+Make sure you are on the ROPSTEN testnet!
+
 Note: A DAO member must sponsor your proposal before members vote on it.
+Note 2: Hit CTRL+D to cancel

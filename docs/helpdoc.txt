@@ -36,6 +36,14 @@ CONTRACT INTERACTIONS:
     addAbi {name abi}
     
     
+MINION PUBLIC RESOLVER DEMO:
+    - This showcases a Moloch dao minion that allows dao members
+      to vote on a change to a dao-owned ENS+IPFS website.
+      
+    miniondemo          See some more info about the minion public resolver
+    minion resolver     Submit a proposal to change an ENS domain content hash
+    
+    
     
 There are plenty more features. Look around and see what you find ;)
     
