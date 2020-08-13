@@ -12,7 +12,7 @@ COMMANDS:
     cat {name}          print file contents 
     help                get some info
     learn               learn a thing or two
-    
+    contact             contact dterm creator
     
 3BOX COMMANDS: 
     box                   start 3box if not started
